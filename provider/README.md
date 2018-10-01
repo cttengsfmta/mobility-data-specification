@@ -136,6 +136,7 @@ Data: `{ "trips": [] }`, an array of objects with the following structure
 | `parking_verification_url` | String | Optional | A URL to a photo (or other evidence) of proper vehicle parking |
 | `standard_cost` | Integer | Optional | The cost, in cents, that it would cost to perform that trip in the standard operation of the System |
 | `actual_cost` | Integer | Optional | The actual cost, in cents, paid by the customer of the *mobility as a service* provider |
+| `membership_type` | Enum | Optional | See [membership types](#membership-types) table |
 
 ### Trips Query Parameters
 
@@ -172,6 +173,15 @@ Gets all trips within that bounding-box where any point inside the `route` is in
 | electric_assist |
 | electric        |
 | combustion      |
+
+### Membership Types
+
+| `membership_type` |
+|--------------|
+| subscriber             |
+| subscriber_low_income  |
+| single_ride            |
+| single_ride_low_income |
 
 ### Routes
 
