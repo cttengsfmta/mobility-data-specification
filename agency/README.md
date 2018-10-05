@@ -1,6 +1,6 @@
 # Mobility Data Specification: **Agency**
 
-This specification contains a collection of RESTful APIs used to specify the digital relationship between *mobility as a service* providers and the agencies that regulate them.
+This specification contains a collection of RESTful APIs used to specify the digital relationship between *mobility as a service* providers and the agencies that regulate them. See the [common section](../common/README.md) for definitions shared between specification documents.
 
 * Authors: LADOT
 * Date: 10 Aug 2018
@@ -20,11 +20,10 @@ This specification contains a collection of RESTful APIs used to specify the dig
 
 ## register_vehicle
 
-The Vehicle Registration API is required in order to register a vehicle for use in the system. The API will require a valid `provider_id` and `api_key`.
+The Vehicle Registration API is required in order to register a vehicle for use in the system. The API will require a valid `provider_id`.
 
 Endpoint: `/register_vehicle`\
-Method: `POST`\
-API Key: `Required`
+Method: `POST`
 
 Body:
 
@@ -38,12 +37,6 @@ Body:
 | `vehicle_year` | Enum | Required | Year Manufactured |
 | `vehicle_mfgr` | Enum | Required | Vehicle Manufacturer |
 | `vehicle_model` | Enum | Required | Vehicle Model |
-
-Response:
-
-| Field | Type     | Required/Optional | Other |
-| ----- | -------- | ----------------- | ----- |
-| `message` | Enum |  | See [Message](#message) Enum |
 
 ## deregister_vehicle
 
@@ -61,19 +54,12 @@ Body:
 | `device_id` | UUID | Required | |
 | `reason_code` | Enum | Required | [Reason](#reason_code) for status change  |
 
-Response:
-
-| Field | Type     | Required/Optional | Other |
-| ----- | -------- | ----------------- | ----- |
-| `message` | Enum |  | See [Message](#message) Enum |
-
 ## update_vehicle_status
 
 This API is used by providers when a vehicle is either removed or returned to service.
 
 Endpoint: `/update_vehicle_status`\
-Method: `PUT`\
-API Key: `Required`
+Method: `POST`
 
 Body:
 
@@ -86,17 +72,10 @@ Body:
 | `reason_code` | Enum | Required | [Reason](#reason_code) for status change.  |
 | `battery_pct` | Float | Require if Applicable | Percent battery charge of device, expressed between 0 and 1 |
 
-Response:
-
-| Field | Type     | Required/Optional | Other |
-| ----- | -------- | ----------------- | ----- |
-| `message` | Enum |  | See [Message](#message) Enum |
-
 ## start_trip
 
 Endpoint: `/start_trip`\
-Method: `POST`\
-API Key: `Required`
+Method: `POST`
 
 Body:
 
@@ -110,17 +89,10 @@ Body:
 | `accuracy` | Integer | Required | The approximate level of accuracy, in meters, represented by start_point and end_point. |
 | `battery_pct_start` | Float | Require if Applicable | Percent battery charge of device, expressed between 0 and 1 |
 
-Response:
-
-| Field | Type     | Required/Optional | Other |
-| ----- | -------- | ----------------- | ----- |
-| `trip_id` | UUID | Required | a unique ID for each trip |
-
 ## end_trip
 
 Endpoint: `/end_trip`\
-Method: `POST`\
-API Key: `Required`
+Method: `POST`
 
 Body:
 
@@ -137,8 +109,7 @@ Body:
 A trip represents a route taken by a provider's customer.   Trip data will be reported to the API every 5 seconds while the vehicle is in motion.
 
 Endpoint: `/update_trip_telemetry`\
-Method: `POST`\
-API Key: `Required`
+Method: `POST`
 
 Body:
 
@@ -148,51 +119,6 @@ Body:
 | `timestamp` | Unix Timestamp | Required | Time of day (UTC) data was sampled|
 | `route` | Route | Required | See detail below. |
 | `accuracy` | Integer | Required | The approximate level of accuracy, in meters, represented by start_point and end_point. |
-
-Response:
-
-| Field | Type | Other |
-| ---- | --- | --- |
-| `message` | Enum | See [Message](#message) Enum |
-
-### Route
-
-To represent a route, MDS provider APIs should create a GeoJSON Feature Collection where ever observed point in the route, plus a time stamp, should be included. The representation needed is below.
-
-The route must include at least 2 points, a start point and end point. Additionally, it must include all possible GPS samples collected by a provider. All points must be in WGS 84 (EPSG:4326) standard GPS projection
-
-```js
-"route": {
-        "type": "FeatureCollection",
-        "features": [
-            {
-                "type": "Feature",
-                "properties": {
-                    "timestamp": 1529968782.421409
-                },
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [
-                        -118.46710503101347,
-                        33.9909333514159
-                    ]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": {
-                    "timestamp": 1531007628.3774529
-                },
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [
-                        -118.464851975441,
-                        33.990366257735
-                    ]
-                }
-            }
-        ] }
-```
 
 ## service_areas
 
@@ -270,20 +196,3 @@ For `reason_code`, options are:
 
 * `rebalancing`
 * `maintenance`
-
-### message
-
-For 'message', options are:
-
-* `200: OK`
-* `201: Created`
-* `202: Accepted`
-* `203: Added`
-* `204: Removed`
-* `210: Warning: vehicle used in this trip has not been properly registered`
-* `305: Error: vehicle is already registered`
-* `306: Error: vehicle registration cannot be found`
-* `310: Error: vehicle is not properly registered`
-* `311: Error: duplicate registration found, please use a different unique_id or update existing unique_id status using the update-vehicle-status endpoint`
-* `315: Error: vehicle is not active`
-* `320: Error: vehicle trip has not been properly started`

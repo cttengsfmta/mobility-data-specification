@@ -1,6 +1,6 @@
 # Mobility Data Specification: **Provider**
 
-This specification contains a data standard for *mobility as a service* providers to define a RESTful API for municipalities to access on-demand.
+This specification contains a data standard for *mobility as a service* providers to define a RESTful API for municipalities to access on-demand. See the [common section](../common/README.md) for definitions shared between specification documents.
 
 ## Table of Contents
 
@@ -11,98 +11,23 @@ This specification contains a data standard for *mobility as a service* provider
 
 ## General Information
 
-The following information applies to all `provider` API endpoints. Details on providing authorization to endpoints is specified in the [auth](auth.md) document.
+The following information applies to all `provider` API endpoints.
 
-### Response Format
+### Data Retention Requirement
 
-Responses must be `UTF-8` encoded `application/json` and must minimally include the MDS `version` and a `data` payload:
+All the endpoints which provide historical data must do so for at least the previous two years. What shall be returned for specific endpoints in the case where the data does not exist back that far is specified for each endpoint where it is applicable.
 
-```json
-{
-    "version": "x.y.z",
-    "data": {
-        "trips": [{
-            "provider_id": "...",
-            "trip_id": "...",
-        }]
-    }
-}
-```
-
-All response fields must use `lower_case_with_underscores`.
-
-#### JSON Schema
+### JSON Schema
 
 MDS defines [JSON Schema](https://json-schema.org/) files for [`trips`][trips-schema] and [`status_changes`][sc-schema].
 
 `provider` API responses must validate against their respective schema files. The schema files always take precedence over the language and examples in this and other supporting documentation meant for *human* consumption.
-
-### Pagination
-
-`provider` APIs may decide to paginate the data payload. If so, pagination must comply with the [JSON API](http://jsonapi.org/format/#fetching-pagination) specification.
-
-The following keys must be used for pagination links:
-
-* `first`: url to the first page of data
-* `last`: url to the last page of data
-* `prev`: url to the previous page of data
-* `next`: url to the next page of data
-
-```json
-{
-    "version": "x.y.z",
-    "data": {
-        "trips": [{
-            "provider_id": "...",
-            "trip_id": "...",
-        }]
-    },
-    "links": {
-        "first": "https://...",
-        "last": "https://...",
-        "prev": "https://...",
-        "next": "https://..."
-    }
-}
-```
 
 ### UUIDs for Devices
 
 MDS defines the *device* as the unit that transmits GPS signals for a particular vehicle. A given device must have a UUID (`device_id` below) that is unique within the Provider's fleet.
 
 Additionally, `device_id` must remain constant for the device's lifetime of service, regardless of the vehicle components that house the device.
-
-### Geographic Data
-
-References to geographic datatypes (Point, MultiPolygon, etc.) imply coordinates encoded in the [WGS 84 (EPSG:4326)](https://en.wikipedia.org/wiki/World_Geodetic_System) standard GPS projection expressed as [Decimal Degrees](https://en.wikipedia.org/wiki/Decimal_degrees).
-
-Whenever an individual location coordinate measurement is presented, it must be
-represented as a GeoJSON [`Feature`](https://tools.ietf.org/html/rfc7946#section-3.2) object with a corresponding [`timestamp`][ts] property and [`Point`](https://tools.ietf.org/html/rfc7946#section-3.1.2) geometry:
-
-```json
-{
-    "type": "Feature",
-    "properties": {
-        "timestamp": 1529968782.421409
-    },
-    "geometry": {
-        "type": "Point",
-        "coordinates": [
-            -118.46710503101347,
-            33.9909333514159
-        ]
-    }
-}
-```
-
-[Top][toc]
-
-### Timestamps
-
-References to `timestamp` imply floating-point seconds since [Unix epoch](https://en.wikipedia.org/wiki/Unix_time), such as
-the format returned by Python's [`time.time()`](https://docs.python.org/3/library/time.html#time.time) function.
-
-[Top][toc]
 
 ## Trips
 
@@ -113,8 +38,7 @@ The trips API allows a user to query historical trip data.
 Endpoint: `/trips`\
 Method: `GET`
 
-Response: See the [`trips` schema][trips-schema] for the expected format._
-Data: `{ "trips": [] }`, an array of objects with the following structure
+Response: See the [`trips` schema][trips-schema] for the expected format.
 
 Data: `{ "trips": [] }`, an array of objects with the following structure
 
@@ -158,6 +82,8 @@ bbox=-122.4183,37.7758,-122.4120,37.7858
 
 Gets all trips within that bounding-box where any point inside the `route` is inside said box. The order is defined as: southwest longitude, southwest latitude, northeast longitude, northeast latitude (separated by commas).
 
+Trips for the entire service area shall be returned if a bounding box is not specified. Trips for all devices shall be returned if a device Id is not specified. The provider shall return the empty JSON object for requests with an end_time that happened before the earliest available trip. A provider shall return an error response as described in the [common section](../common/README.md) for requests with a start_time in the future or an end_time which is smaller than the start_time.
+
 ### Vehicle Types
 
 | `vehicle_type` |
@@ -182,46 +108,6 @@ Gets all trips within that bounding-box where any point inside the `route` is in
 | subscriber_low_income  |
 | single_ride            |
 | single_ride_low_income |
-
-### Routes
-
-To represent a route, MDS `provider` APIs must create a GeoJSON [`FeatureCollection`](https://tools.ietf.org/html/rfc7946#section-3.3), which includes every [observed point][geo] in the route.
-
-Routes must include at least 2 points: the start point and end point. Additionally, routes must include all possible GPS samples collected by a provider.
-
-```js
-"route": {
-    "type": "FeatureCollection",
-    "features": [{
-        "type": "Feature",
-        "properties": {
-            "timestamp": 1529968782.421409
-        },
-        "geometry": {
-            "type": "Point",
-            "coordinates": [
-                -118.46710503101347,
-                33.9909333514159
-            ]
-        }
-    },
-    {
-        "type": "Feature",
-        "properties": {
-            "timestamp": 1531007628.3774529
-        },
-        "geometry": {
-            "type": "Point",
-            "coordinates": [
-                -118.464851975441,
-                33.990366257735
-            ]
-        }
-    }]
-}
-```
-
-[Top][toc]
 
 ## Status Changes
 
@@ -265,6 +151,8 @@ Example:
 bbox=-122.4183,37.7758,-122.4120,37.7858
 ```
 
+Status changes for the entire service area shall be returned if a bounding box is not specified. Status changes for all devices shall be returned if a device Id is not specified. The provider shall return the empty JSON object for requests with an end_time that happened before the earliest available trip. A provider shall return an error response as described in the [common section](../common/README.md) for requests with a start_time in the future or an end_time which is smaller than the start_time.
+
 ### Event Types
 
 | `event_type` | Description | `event_type_reason` | Description |
@@ -307,8 +195,8 @@ Response:
 | Field | Types  | Required/Optional | Other |
 | ----- | ---- | ----------------- | ----- |
 | `service_area_id` | UUID | Required |  |
-| `service_start_date` | Unix Timestamp | Required | Date at which this service area became effective |
-| `service_end_date` | Unix Timestamp | Required | Date at which this service area was replaced. If currently effective, place NaN |
+| `service_start_date` | timestamp | Required | Date at which this service area became effective |
+| `service_end_date` | timestamp | Required | Date at which this service area was replaced. If currently effective, place NaN |
 | `service_area` | MultiPolygon | Required | |
 | `prior_service_area` | UUID | Optional | If exists, the UUID of the prior service area. |
 | `replacement_service_area` | UUID | Optional | If exists, the UUID of the service area that replaced this one |
@@ -334,8 +222,6 @@ Response:
 
 [Top][toc]
 
-[geo]: #geographic-data
 [sc-schema]: status_changes.json
 [toc]: #table-of-contents
 [trips-schema]: trips.json
-[ts]: #timestamps
