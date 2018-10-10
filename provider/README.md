@@ -29,6 +29,46 @@ MDS defines the *device* as the unit that transmits GPS signals for a particular
 
 Additionally, `device_id` must remain constant for the device's lifetime of service, regardless of the vehicle components that house the device.
 
+### Route
+
+The representation of a route is similar to a GeoJSON [`FeatureCollection`](https://tools.ietf.org/html/rfc7946#section-3.3), which includes every observed `Point` in the route, plus an additional `properties` section.
+
+The route must include at least 2 `Point`s, a start point and end point. Additionally, it must include all possible GPS samples collected by a provider.
+
+```json
+"route": {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {
+                    "timestamp": 1538770678558
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                        -118.46710503101347,
+                        33.9909333514159
+                    ]
+                }
+            },
+            {
+                "type": "Feature",
+                "properties": {
+                    "timestamp": 1538770678558
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                        -118.464851975441,
+                        33.990366257735
+                    ]
+                }
+            }
+        ] }
+```
+
+
 ## Trips
 
 A trip represents a journey taken by a *mobility as a service* customer with a geo-tagged start and stop point.
@@ -168,16 +208,6 @@ Status changes for the entire service area shall be returned if a bounding box i
 | | | `rebalance_pick_up` | Device removed from street and will be placed at another location to rebalance service |
 | | | `maintenance_pick_up` | Device removed from street so it can be worked on |
 
-<<<<<<< HEAD
-## Realtime Data
-
-All MDS compatible `provider` APIs must expose a public [GBFS](https://github.com/NABSA/gbfs) feed as well. Given that GBFS hasn't fully [evolved to support dockless mobility](https://github.com/NABSA/gbfs/pull/92) yet, we follow the current guidelines in making bike information avaliable to the public. 
-
-  - `system_information.json` is always required
-  - `free_bike_status.json` is required for MDS
-  - `station_information.json` and `station_status.json` don't apply for MDS
-
-=======
 ## Service Areas
 
 Gets the list of service areas available to the provider.
@@ -216,9 +246,13 @@ Response:
 
 [Top][toc]
 
-### Realtime Data
->>>>>>> Add service area type to the agency API. Add service areas to the provider API
+## Realtime Data
 
+All MDS compatible `provider` APIs must expose a public [GBFS](https://github.com/NABSA/gbfs) feed as well. Given that GBFS hasn't fully [evolved to support dockless mobility](https://github.com/NABSA/gbfs/pull/92) yet, we follow the current guidelines in making bike information avaliable to the public. 
+
+  - `system_information.json` is always required
+  - `free_bike_status.json` is required for MDS
+  - `station_information.json` and `station_status.json` don't apply for MDS
 
 [Top][toc]
 

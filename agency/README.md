@@ -29,14 +29,10 @@ Body:
 
 | Field | Type     | Required/Optional | Other |
 | ----- | -------- | ----------------- | ----- |
-| `unique_id` | UUID | Required | UUID v4 provided by Operator to uniquely identify a vehicle |
-| `provider_id` | String | Required | Issued by city |
-| `vehicle_id` | String |  | Vehicle Identification Number (VIN) visible on device|
+| `unique_id` | UUID | Required | UUID provided by a provider to uniquely identify a vehicle |
+| `provider_id` | String | Required | Issued by agency |
 | `vehicle_type` | Enum | Required | Vehicle Type |
 | `propulsion_type` | Enum | Required | Propulsion Type |
-| `vehicle_year` | Enum | Required | Year Manufactured |
-| `vehicle_mfgr` | Enum | Required | Vehicle Manufacturer |
-| `vehicle_model` | Enum | Required | Vehicle Model |
 
 ## deregister_vehicle
 
@@ -51,7 +47,7 @@ Body:
 | Field | Type     | Required/Optional | Other |
 | ----- | -------- | ----------------- | ----- |
 | `unique_id` | UUID | Required | ID used in [Register](#register_vehicle) |
-| `device_id` | UUID | Required | |
+| `provider_id` | String | Required | Issued by agency |
 | `reason_code` | Enum | Required | [Reason](#reason_code) for status change  |
 
 ## update_vehicle_status
@@ -66,11 +62,12 @@ Body:
 | Field | Type | Required/Optional | Other |
 | ----- | ---- | ----------------- | ----- |
 | `unique_id` | UUID | Required | ID used in [Register](#register_vehicle) |
-| `timestamp` | Unix Timestamp | Required | Date/time that event occurred. Based on GPS clock. |
-| `location` | Point | Required | Location at the time of status change in WGS 84 (EPSG:4326) standard GPS projection  |
+| `provider_id` | String | Required | Issued by agency |
+| `timestamp` | Timestamp | Required | Date/time that event occurred. |
+| `location` | Point | Required | Location at the time of status change |
 | `event_type` | Enum | Required | [Event Type](#event_type) for status change.  |
 | `reason_code` | Enum | Required | [Reason](#reason_code) for status change.  |
-| `battery_pct` | Float | Require if Applicable | Percent battery charge of device, expressed between 0 and 1 |
+| `battery_pct` | Float | Optional | Percent battery charge of device, expressed between 0 and 1 |
 
 ## start_trip
 
@@ -81,13 +78,13 @@ Body:
 
 | Field | Type | Required/Optional | Other |
 | ----- | ---- | ----------------- | ----- |
+| `trip_id` | UUID | Required | Uniquely identifies this trip |
 | `unique_id` | UUID | Required | ID used in [Register](#register_vehicle) |
-| `provider_id` | String | Required | Issued by city |
-| `vehicle_id` | String | Required | Provided by the Vehicle Registration API |
-| `timestamp` | Unix Timestamp | Required | Date/time that event occurred. Based on GPS clock. |
-| `location` | Point | Required | Location at the time of status change in WGS 84 (EPSG:4326) standard GPS projection  |
+| `provider_id` | String | Required | Issued by agency |
+| `timestamp` | Timestamp | Required | Date/time that event occurred. |
+| `location` | Point | Required | Location at the time of status change |
 | `accuracy` | Integer | Required | The approximate level of accuracy, in meters, represented by start_point and end_point. |
-| `battery_pct_start` | Float | Require if Applicable | Percent battery charge of device, expressed between 0 and 1 |
+| `battery_pct` | Float | Optional | Percent battery charge of device, expressed between 0 and 1 |
 
 ## end_trip
 
@@ -99,10 +96,11 @@ Body:
 | Field | Type | Required/Optional | Other |
 | ----- | ---- | ----------------- | ----- |
 | `trip_id` | UUID | Required | See [start_trip](#start_trip) |
-| `timestamp` | Unix Timestamp | Required | Date/time that event occurred. Based on GPS clock. |
-| `location` | Point | Required | Location at the time of status change in WGS 84 (EPSG:4326) standard GPS projection  |
+| `provider_id` | String | Required | Issued by agency |
+| `timestamp` | Timestamp | Required | Date/time that event occurred. |
+| `location` | Point | Required | Location at the time of status change |
 | `accuracy` | Integer | Required | The approximate level of accuracy, in meters, represented by start_point and end_point. |
-| `battery_pct_end` | Float | Require if Applicable | Percent battery charge of device, expressed between 0 and 1 |
+| `battery_pct` | Float | Optional | Percent battery charge of device, expressed between 0 and 1 |
 
 ## update_trip_telemetry
 
@@ -115,10 +113,12 @@ Body:
 
 | Field | Type     | Required/Optional | Other |
 | ----- | -------- | ----------------- | ----- |
-| `trip_id` | UUID | Required | Issued by InitMovementPlan() API  |
-| `timestamp` | Unix Timestamp | Required | Time of day (UTC) data was sampled|
-| `route` | Route | Required | See detail below. |
+| `trip_id` | UUID | Required | See [start_trip](#start_trip) |
+| `provider_id` | String | Required | Issued by agency |
+| `timestamp` | Timestamp | Required | Date/time that event occurred. |
+| `location` | Point | Required | Location at the time of status change |
 | `accuracy` | Integer | Required | The approximate level of accuracy, in meters, represented by start_point and end_point. |
+| `battery_pct` | Float | Optional | Percent battery charge of device, expressed between 0 and 1 |
 
 ## service_areas
 
